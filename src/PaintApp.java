@@ -1,4 +1,4 @@
-// File: PaintApp.java
+
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.BorderLayout;
@@ -31,25 +31,27 @@ import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.Box;
+import javax.swing.Icon;
+import java.awt.Component;
 
 public class PaintApp {
     
-    // Main method that starts the application by configuring the system Look and Feel
+    // Método principal que inicia la aplicación configurando el Look and Feel del sistema
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            System.out.println("Could not set system Look and Feel");
+            System.out.println("No se pudo establecer el Look and Feel del sistema");
         }
         new PaintApp();
     }
 
-    // Enumeration that defines available drawing tools
+    // Enumeración que define las herramientas de dibujo disponibles
     enum Tool {
         PENCIL, RECTANGLE, OVAL, ERASER
     }
 
-    // Predefined color palette with modern and professional tones
+    // Paleta de colores predefinida con tonos modernos y profesionales
     private static final Color[] COLOR_PALETTE = {
         new Color(34, 34, 34), new Color(220, 53, 69), new Color(40, 123, 222), 
         new Color(40, 167, 69), new Color(255, 193, 7), new Color(253, 126, 20),
@@ -57,7 +59,143 @@ public class PaintApp {
         new Color(111, 66, 193)
     };
 
-    // Class that encapsulates a shape with its color, line thickness and fill color
+    // Clase para crear iconos personalizados dibujados programáticamente
+    class CustomIcon implements Icon {
+        private String type;
+        private int size;
+        private Color color;
+        
+        public CustomIcon(String type, int size, Color color) {
+            this.type = type;
+            this.size = size;
+            this.color = color;
+        }
+        
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2d.setColor(color);
+            g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            
+            switch (type) {
+                case "PENCIL":
+                    // Dibujar lápiz mejorado
+                    g2d.setColor(new Color(139, 69, 19)); // Marrón para el lápiz
+                    g2d.fillRect(x + 8, y + 2, 6, size - 8);
+                    g2d.setColor(new Color(255, 215, 0)); // Dorado para la banda
+                    g2d.fillRect(x + 8, y + 4, 6, 3);
+                    g2d.setColor(Color.BLACK); // Negro para la punta
+                    int[] xPoints = {x + 8, x + 14, x + 11};
+                    int[] yPoints = {y + size - 6, y + size - 6, y + size - 2};
+                    g2d.fillPolygon(xPoints, yPoints, 3);
+                    g2d.setColor(Color.DARK_GRAY);
+                    g2d.drawRect(x + 8, y + 2, 6, size - 8);
+                    break;
+                    
+                case "RECTANGLE":
+                    // Dibujar rectángulo con relleno
+                    g2d.setColor(new Color(100, 149, 237));
+                    g2d.fillRect(x + 4, y + 6, size - 8, size - 12);
+                    g2d.setColor(Color.BLACK);
+                    g2d.setStroke(new BasicStroke(2));
+                    g2d.drawRect(x + 4, y + 6, size - 8, size - 12);
+                    break;
+                    
+                case "OVAL":
+                    // Dibujar círculo con relleno
+                    g2d.setColor(new Color(255, 182, 193));
+                    g2d.fillOval(x + 4, y + 4, size - 8, size - 8);
+                    g2d.setColor(Color.BLACK);
+                    g2d.setStroke(new BasicStroke(2));
+                    g2d.drawOval(x + 4, y + 4, size - 8, size - 8);
+                    break;
+                    
+                case "ERASER":
+                    // Dibujar borrador mejorado
+                    g2d.setColor(new Color(255, 192, 203)); // Rosa claro
+                    g2d.fillRoundRect(x + 4, y + 4, size - 8, size - 8, 4, 4);
+                    g2d.setColor(Color.BLACK);
+                    g2d.setStroke(new BasicStroke(1));
+                    g2d.drawRoundRect(x + 4, y + 4, size - 8, size - 8, 4, 4);
+                    // Líneas de textura
+                    g2d.drawLine(x + 6, y + 8, x + size - 6, y + 8);
+                    g2d.drawLine(x + 6, y + size - 8, x + size - 6, y + size - 8);
+                    break;
+                    
+                case "CLEAR":
+                    // Dibujar bote de basura mejorado
+                    g2d.setColor(Color.DARK_GRAY);
+                    g2d.setStroke(new BasicStroke(2));
+                    // Cuerpo del bote
+                    g2d.drawRect(x + 6, y + 8, size - 12, size - 10);
+                    // Tapa
+                    g2d.drawLine(x + 4, y + 8, x + size - 4, y + 8);
+                    g2d.drawLine(x + 8, y + 6, x + size - 8, y + 6);
+                    // Líneas verticales
+                    g2d.drawLine(x + 9, y + 10, x + 9, y + size - 4);
+                    g2d.drawLine(x + 12, y + 10, x + 12, y + size - 4);
+                    g2d.drawLine(x + 15, y + 10, x + 15, y + size - 4);
+                    break;
+                    
+                case "PALETTE":
+                    // Dibujar paleta mejorada
+                    g2d.setColor(Color.WHITE);
+                    g2d.fillOval(x + 2, y + 2, size - 4, size - 4);
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawOval(x + 2, y + 2, size - 4, size - 4);
+                    // Colores en la paleta
+                    g2d.setColor(Color.RED);
+                    g2d.fillOval(x + 5, y + 5, 4, 4);
+                    g2d.setColor(Color.BLUE);
+                    g2d.fillOval(x + size - 9, y + 5, 4, 4);
+                    g2d.setColor(Color.GREEN);
+                    g2d.fillOval(x + 5, y + size - 9, 4, 4);
+                    g2d.setColor(Color.YELLOW);
+                    g2d.fillOval(x + size - 9, y + size - 9, 4, 4);
+                    break;
+                    
+                case "BRUSH":
+                    // Dibujar pincel mejorado
+                    g2d.setColor(new Color(139, 69, 19)); // Mango marrón
+                    g2d.fillRect(x + 8, y + 2, 4, size - 8);
+                    g2d.setColor(new Color(192, 192, 192)); // Férula plateada
+                    g2d.fillRect(x + 7, y + size - 8, 6, 3);
+                    g2d.setColor(Color.BLACK); // Cerdas
+                    for (int i = 0; i < 3; i++) {
+                        g2d.drawLine(x + 8 + i, y + size - 5, x + 8 + i, y + size - 2);
+                    }
+                    g2d.setColor(Color.DARK_GRAY);
+                    g2d.drawRect(x + 8, y + 2, 4, size - 8);
+                    break;
+                    
+                case "STROKE":
+                    // Dibujar líneas de diferentes grosores
+                    g2d.setColor(Color.BLACK);
+                    g2d.setStroke(new BasicStroke(1));
+                    g2d.drawLine(x + 2, y + 6, x + size - 2, y + 6);
+                    g2d.setStroke(new BasicStroke(2));
+                    g2d.drawLine(x + 2, y + 10, x + size - 2, y + 10);
+                    g2d.setStroke(new BasicStroke(4));
+                    g2d.drawLine(x + 2, y + 16, x + size - 2, y + 16);
+                    break;
+            }
+            
+            g2d.dispose();
+        }
+        
+        @Override
+        public int getIconWidth() {
+            return size;
+        }
+        
+        @Override
+        public int getIconHeight() {
+            return size;
+        }
+    }
+
+    // Clase que encapsula una forma con su color, grosor de línea y color de relleno
     class StrokedShape {
         Shape shape;
         Color strokeColor;
@@ -74,17 +212,17 @@ public class PaintApp {
         }
     }
 
-    // Main panel where all drawings are made
+    // Panel principal donde se realizan todos los dibujos
     class DrawingPanel extends JPanel {
         private List<StrokedShape> shapes = new ArrayList<>();
         private StrokedShape currentShape;
         private Point startPoint;
         private Tool currentTool = Tool.PENCIL;
         private Color currentStrokeColor = new Color(34, 34, 34);
-        private Color currentFillColor = new Color(255, 255, 255); // White by default
-        private int brushSize = 3;
+        private Color currentFillColor = new Color(255, 255, 255);
+        private int strokeSize = 2;
 
-        // Constructor that initializes the drawing panel with basic configuration
+        // Constructor que inicializa el panel de dibujo con configuración básica
         public DrawingPanel() {
             setBackground(Color.WHITE);
             setBorder(BorderFactory.createCompoundBorder(
@@ -93,12 +231,11 @@ public class PaintApp {
             initializeMouseListeners();
         }
 
-        // Configures mouse events to detect clicks and drags
+        // Configura los eventos del mouse para detectar clics y arrastres
         private void initializeMouseListeners() {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    // Only draw with left click (REQUIREMENT: Only Draw with left click)
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         startPoint = e.getPoint();
                         currentShape = null;
@@ -107,7 +244,6 @@ public class PaintApp {
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    // Only process left click for drawing (REQUIREMENT: Only Draw with left click)
                     if (e.getButton() == MouseEvent.BUTTON1 && currentShape != null) {
                         shapes.add(currentShape);
                         currentShape = null;
@@ -119,7 +255,6 @@ public class PaintApp {
             addMouseMotionListener(new MouseAdapter() {
                 @Override
                 public void mouseDragged(MouseEvent e) {
-                    // Only draw with left button pressed (REQUIREMENT: Only Draw with left click)
                     if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
                         handleMouseDrag(e.getPoint());
                     }
@@ -127,95 +262,91 @@ public class PaintApp {
             });
         }
 
-        // Processes mouse movement according to selected tool
+        // Procesa el movimiento del mouse según la herramienta seleccionada
         private void handleMouseDrag(Point endPoint) {
-            BasicStroke stroke = new BasicStroke(brushSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            BasicStroke stroke = new BasicStroke(strokeSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
             
             switch (currentTool) {
                 case PENCIL:
+                    // Líneas con color y grosor seleccionado
                     shapes.add(new StrokedShape(
                         new Line2D.Double(startPoint, endPoint), currentStrokeColor, null, stroke, false));
                     startPoint = endPoint;
                     break;
                     
                 case RECTANGLE:
+                    // Rectángulos con línea y relleno, grosor seleccionado
                     currentShape = createRectangle(startPoint, endPoint, stroke);
                     break;
                     
                 case OVAL:
+                    // Círculos con línea y relleno, grosor seleccionado
                     currentShape = createOval(startPoint, endPoint, stroke);
                     break;
                     
                 case ERASER:
-                    BasicStroke eraserStroke = new BasicStroke(brushSize, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+                    // Borrador con grosor seleccionado
                     shapes.add(new StrokedShape(
-                        new Line2D.Double(startPoint, endPoint), Color.WHITE, null, eraserStroke, false));
+                        new Line2D.Double(startPoint, endPoint), Color.WHITE, null, stroke, false));
                     startPoint = endPoint;
                     break;
             }
             repaint();
         }
 
-        // Creates a rectangle based on two points with specified thickness
+        // Crea un rectángulo con colores de línea y relleno
         private StrokedShape createRectangle(Point start, Point end, BasicStroke stroke) {
             int x = Math.min(start.x, end.x);
             int y = Math.min(start.y, end.y);
             int width = Math.abs(end.x - start.x);
             int height = Math.abs(end.y - start.y);
-            // REQUIREMENT: Fill the shape with the selected fill color
             return new StrokedShape(new Rectangle2D.Double(x, y, width, height), 
                                   currentStrokeColor, currentFillColor, stroke, true);
         }
 
-        // Creates an oval based on two points with specified thickness
+        // Crea un óvalo/círculo con colores de línea y relleno
         private StrokedShape createOval(Point start, Point end, BasicStroke stroke) {
             int x = Math.min(start.x, end.x);
             int y = Math.min(start.y, end.y);
             int width = Math.abs(end.x - start.x);
             int height = Math.abs(end.y - start.y);
-            // REQUIREMENT: Fill the shape with the selected fill color
             return new StrokedShape(new Ellipse2D.Double(x, y, width, height), 
                                   currentStrokeColor, currentFillColor, stroke, true);
         }
 
-        // Removes all drawn shapes from canvas
+        // Herramienta Clear - elimina todo
         public void clearCanvas() {
             shapes.clear();
             currentShape = null;
             repaint();
         }
 
-        // Sets current drawing tool
+        // Setters y getters
         public void setCurrentTool(Tool tool) {
             this.currentTool = tool;
         }
 
-        // Sets current stroke color
         public void setCurrentStrokeColor(Color color) {
             this.currentStrokeColor = color;
         }
 
-        // Sets current fill color
         public void setCurrentFillColor(Color color) {
             this.currentFillColor = color;
         }
 
-        // Gets current stroke color
         public Color getCurrentStrokeColor() {
             return this.currentStrokeColor;
         }
 
-        // Gets current fill color
         public Color getCurrentFillColor() {
             return this.currentFillColor;
         }
 
-        // Sets brush/eraser size
-        public void setBrushSize(int size) {
-            this.brushSize = size;
+        public void setStrokeSize(int size) {
+            this.strokeSize = size;
         }
 
-        // Renders all shapes on the panel with improved quality
+        // Renderizado con anti-aliasing
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -223,29 +354,26 @@ public class PaintApp {
             
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
             
+            // Dibujar todas las formas
             for (StrokedShape strokedShape : shapes) {
-                // Draw fill if shape requires it (REQUIREMENT: Fill the shape with the selected fill color)
                 if (strokedShape.isFilled && strokedShape.fillColor != null) {
                     g2d.setColor(strokedShape.fillColor);
                     g2d.fill(strokedShape.shape);
                 }
                 
-                // Draw the outline
                 g2d.setColor(strokedShape.strokeColor);
                 g2d.setStroke(strokedShape.stroke);
                 g2d.draw(strokedShape.shape);
             }
             
+            // Dibujar forma actual en progreso
             if (currentShape != null) {
-                // Draw fill of current shape (REQUIREMENT: Fill the shape with the selected fill color)
                 if (currentShape.isFilled && currentShape.fillColor != null) {
                     g2d.setColor(currentShape.fillColor);
                     g2d.fill(currentShape.shape);
                 }
                 
-                // Draw outline of current shape
                 g2d.setColor(currentShape.strokeColor);
                 g2d.setStroke(currentShape.stroke);
                 g2d.draw(currentShape.shape);
@@ -253,11 +381,11 @@ public class PaintApp {
         }
     }
 
-    // Variables for color panels (REQUIREMENT: Add panels to reflect selected colors)
+    // Variables para mostrar colores seleccionados
     private JPanel strokeColorPanel;
     private JPanel fillColorPanel;
 
-    // Main constructor that assembles the entire application interface
+    // Constructor principal
     public PaintApp() {
         JFrame frame = createMainFrame();
         DrawingPanel drawingPanel = new DrawingPanel();
@@ -273,15 +401,13 @@ public class PaintApp {
         frame.setVisible(true);
     }
 
-    // Creates and configures the main application window
     private JFrame createMainFrame() {
-        JFrame frame = new JFrame("Java Paint App - Session Requirements Fulfilled");
+        JFrame frame = new JFrame("Java Paint App - Session 4");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
         return frame;
     }
 
-    // Creates the top panel with title and gradient background
     private JPanel createHeaderPanel() {
         JPanel headerPanel = new JPanel() {
             @Override
@@ -298,16 +424,14 @@ public class PaintApp {
         };
         headerPanel.setPreferredSize(new Dimension(0, 80));
         
-        JLabel titleLabel = new JLabel("🎨 Java Paint App - May 16th Session Requirements", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        JLabel titleLabel = new JLabel("Java Paint App - Session 4", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(Color.WHITE);
-        titleLabel.setPreferredSize(new Dimension(0, 40));
         headerPanel.add(titleLabel);
         
         return headerPanel;
     }
 
-    // Creates the left side panel with tools and color palette
     private JPanel createToolPanel(DrawingPanel drawingPanel) {
         JPanel toolPanel = new JPanel();
         toolPanel.setLayout(new GridBagLayout());
@@ -321,58 +445,72 @@ public class PaintApp {
         gbc.insets = new Insets(5, 0, 5, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
-        
-        JLabel toolsLabel = new JLabel("Drawing Tools");
-        toolsLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        toolsLabel.setForeground(new Color(73, 80, 87));
         gbc.gridy = 0;
+        
+        // Título de herramientas
+        JLabel toolsLabel = new JLabel("Drawing Tools");
+        toolsLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        toolsLabel.setForeground(new Color(73, 80, 87));
         toolPanel.add(toolsLabel, gbc);
         
-        gbc.gridy = 1;
+        gbc.gridy++;
         toolPanel.add(Box.createVerticalStrut(10), gbc);
         
+        // Botones de herramientas con iconos
         addDrawingTools(toolPanel, drawingPanel, gbc);
+        
+        // Indicadores de colores seleccionados
         addColorIndicators(toolPanel, drawingPanel, gbc);
+        
+        // Paleta de colores
         addColorPalette(toolPanel, drawingPanel, gbc);
+        
+        // Botón Clear
         addClearButton(toolPanel, drawingPanel, gbc);
         
         return toolPanel;
     }
 
-    // Adds drawing tool buttons to the side panel
     private void addDrawingTools(JPanel toolPanel, DrawingPanel drawingPanel, GridBagConstraints gbc) {
         ButtonGroup toolGroup = new ButtonGroup();
         
         String[][] tools = {
-            {"✏️", "Pencil", "PENCIL"},
-            {"⬜", "Rectangle", "RECTANGLE"}, 
-            {"⭕", "Oval", "OVAL"},
-            {"🧽", "Eraser", "ERASER"}
+            {"PENCIL", "Pencil"},
+            {"RECTANGLE", "Rectangle"}, 
+            {"OVAL", "Circle"},
+            {"ERASER", "Eraser"}
         };
         
         for (int i = 0; i < tools.length; i++) {
-            JToggleButton button = createModernToolButton(
-                tools[i][0], tools[i][1], Tool.valueOf(tools[i][2]), 
+            JToggleButton button = createToolButton(
+                tools[i][0], tools[i][1], Tool.valueOf(tools[i][0]), 
                 drawingPanel, i == 0
             );
             toolGroup.add(button);
-            gbc.gridy = i + 2;
+            gbc.gridy++;
             toolPanel.add(button, gbc);
         }
     }
 
-    // Creates tool buttons with modern design and visual effects
-    private JToggleButton createModernToolButton(String icon, String text, Tool tool, DrawingPanel drawingPanel, boolean selected) {
-        JToggleButton button = new JToggleButton(
-            "<html><div style='text-align: center'>" + 
-            "<div style='font-size: 16px'>" + icon + "</div>" +
-            "<div style='font-size: 10px; margin-top: 2px'>" + text + "</div></html>"
-        );
+    private JToggleButton createToolButton(String iconType, String text, Tool tool, DrawingPanel drawingPanel, boolean selected) {
+        JToggleButton button = new JToggleButton();
+        button.setLayout(new BorderLayout());
         
-        button.setPreferredSize(new Dimension(250, 60));
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        // Panel con icono
+        JPanel iconPanel = new JPanel();
+        iconPanel.setOpaque(false);
+        iconPanel.add(new JLabel(new CustomIcon(iconType, 24, Color.DARK_GRAY)));
+        
+        // Label con texto
+        JLabel textLabel = new JLabel(text, SwingConstants.CENTER);
+        textLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        
+        button.add(iconPanel, BorderLayout.CENTER);
+        button.add(textLabel, BorderLayout.SOUTH);
+        
+        button.setPreferredSize(new Dimension(250, 70));
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        button.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
         button.setSelected(selected);
         
         updateButtonStyle(button, selected);
@@ -385,18 +523,16 @@ public class PaintApp {
         return button;
     }
 
-    // Updates visual style of buttons according to their state
     private void updateButtonStyle(JToggleButton button, boolean selected) {
         if (selected) {
             button.setBackground(new Color(67, 56, 202));
             button.setForeground(Color.WHITE);
         } else {
             button.setBackground(Color.WHITE);
-            button.setForeground(Color.BLACK);
+            button.setForeground(new Color(73, 80, 87));
         }
     }
 
-    // Updates style of all tool buttons
     private void updateToolButtonStyles(java.awt.Container parent) {
         for (java.awt.Component comp : parent.getComponents()) {
             if (comp instanceof JToggleButton) {
@@ -406,86 +542,73 @@ public class PaintApp {
         }
     }
 
-    // REQUIREMENT: Add panels to reflect the selected colors
     private void addColorIndicators(JPanel toolPanel, DrawingPanel drawingPanel, GridBagConstraints gbc) {
-        gbc.gridy = 7;
+        gbc.gridy++;
         toolPanel.add(Box.createVerticalStrut(20), gbc);
         
-        // Panel to show selected colors (REQUIREMENT: Add panels to reflect selected colors)
+        // Panel para mostrar colores seleccionados
         JPanel colorIndicatorPanel = new JPanel();
         colorIndicatorPanel.setLayout(new java.awt.GridLayout(2, 2, 10, 5));
         colorIndicatorPanel.setBackground(new Color(248, 249, 250));
         colorIndicatorPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(67, 56, 202), 2),
-            "Selected Colors - May 16th Session",
-            javax.swing.border.TitledBorder.CENTER,
-            javax.swing.border.TitledBorder.TOP,
-            new Font("Segoe UI", Font.BOLD, 12),
-            new Color(67, 56, 202)
+            BorderFactory.createEtchedBorder(), "Selected Colors",
+            javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+            javax.swing.border.TitledBorder.DEFAULT_POSITION,
+            new Font("Arial", Font.BOLD, 12)
         ));
         
-        // Labels
-        JLabel strokeLabel = new JLabel("Stroke Color:");
-        strokeLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        strokeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel strokeLabel = new JLabel("Line:", SwingConstants.CENTER);
+        strokeLabel.setFont(new Font("Arial", Font.BOLD, 11));
         
-        JLabel fillLabel = new JLabel("Fill Color:");
-        fillLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        fillLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel fillLabel = new JLabel("Fill:", SwingConstants.CENTER);
+        fillLabel.setFont(new Font("Arial", Font.BOLD, 11));
         
-        // Color panels with better size (REQUIREMENT: Add panel to reflect the selected color)
         strokeColorPanel = new JPanel();
         strokeColorPanel.setBackground(drawingPanel.getCurrentStrokeColor());
-        strokeColorPanel.setPreferredSize(new Dimension(60, 50));
-        strokeColorPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLoweredBevelBorder(),
-            BorderFactory.createEmptyBorder(2, 2, 2, 2)));
+        strokeColorPanel.setPreferredSize(new Dimension(50, 40));
+        strokeColorPanel.setBorder(BorderFactory.createLoweredBevelBorder());
         
-        // REQUIREMENT: Add a panel to reflect the selected fill color
         fillColorPanel = new JPanel();
         fillColorPanel.setBackground(drawingPanel.getCurrentFillColor());
-        fillColorPanel.setPreferredSize(new Dimension(60, 50));
-        fillColorPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLoweredBevelBorder(),
-            BorderFactory.createEmptyBorder(2, 2, 2, 2)));
+        fillColorPanel.setPreferredSize(new Dimension(50, 40));
+        fillColorPanel.setBorder(BorderFactory.createLoweredBevelBorder());
         
         colorIndicatorPanel.add(strokeLabel);
         colorIndicatorPanel.add(strokeColorPanel);
         colorIndicatorPanel.add(fillLabel);
         colorIndicatorPanel.add(fillColorPanel);
         
-        gbc.gridy = 8;
+        gbc.gridy++;
         toolPanel.add(colorIndicatorPanel, gbc);
     }
 
-    // Adds selectable color palette to side panel
     private void addColorPalette(JPanel toolPanel, DrawingPanel drawingPanel, GridBagConstraints gbc) {
-        gbc.gridy = 9;
+        gbc.gridy++;
         toolPanel.add(Box.createVerticalStrut(10), gbc);
         
-        JLabel colorLabel = new JLabel("Color Palette");
-        colorLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        colorLabel.setForeground(new Color(73, 80, 87));
-        gbc.gridy = 10;
-        toolPanel.add(colorLabel, gbc);
+        JPanel paletteHeader = new JPanel(new BorderLayout());
+        paletteHeader.setOpaque(false);
+        paletteHeader.add(new JLabel(new CustomIcon("PALETTE", 20, Color.DARK_GRAY)), BorderLayout.WEST);
         
-        // REQUIREMENT: Select the color only when the click is the left click
-        // REQUIREMENT: Select the fill color of the shape with the right click
-        JLabel instructionLabel = new JLabel("<html><center><b>Session Instructions:</b><br>" +
-            "Left click: Stroke Color<br>" +
-            "Right click: Fill Color<br>" +
-            "<i>Drawing only with left click</i></center></html>");
-        instructionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        JLabel colorLabel = new JLabel(" Color Palette");
+        colorLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        colorLabel.setForeground(new Color(73, 80, 87));
+        paletteHeader.add(colorLabel, BorderLayout.CENTER);
+        
+        gbc.gridy++;
+        toolPanel.add(paletteHeader, gbc);
+        
+        JLabel instructionLabel = new JLabel("<html><center>Left click: Line color<br>Right click: Fill color</center></html>");
+        instructionLabel.setFont(new Font("Arial", Font.ITALIC, 10));
         instructionLabel.setForeground(new Color(108, 117, 125));
         instructionLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        instructionLabel.setBorder(BorderFactory.createLineBorder(new Color(40, 167, 69), 1));
-        gbc.gridy = 11;
+        gbc.gridy++;
         toolPanel.add(instructionLabel, gbc);
         
-        gbc.gridy = 12;
+        gbc.gridy++;
         toolPanel.add(Box.createVerticalStrut(5), gbc);
         
-        JPanel colorGrid = new JPanel(new java.awt.GridLayout(2, 5, 8, 8));
+        JPanel colorGrid = new JPanel(new java.awt.GridLayout(2, 5, 10, 10));
         colorGrid.setBackground(new Color(248, 249, 250));
         colorGrid.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         
@@ -494,48 +617,31 @@ public class PaintApp {
             colorGrid.add(colorPanel);
         }
         
-        gbc.gridy = 13;
+        gbc.gridy++;
         toolPanel.add(colorGrid, gbc);
     }
 
-    // Creates individual color buttons with hover effects and support for both clicks
     private JPanel createColorButton(Color color, DrawingPanel drawingPanel) {
         JPanel colorPanel = new JPanel();
         colorPanel.setBackground(color);
-        colorPanel.setPreferredSize(new Dimension(40, 40));
-        colorPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createRaisedBevelBorder(),
-            BorderFactory.createLoweredBevelBorder()));
+        colorPanel.setPreferredSize(new Dimension(35, 35));
+        colorPanel.setBorder(BorderFactory.createRaisedBevelBorder());
         colorPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         
         colorPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                // REQUIREMENT: Select the color only when the click is the left click
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    // Left click: stroke color
+                    // Clic izquierdo: color de línea
                     drawingPanel.setCurrentStrokeColor(color);
                     strokeColorPanel.setBackground(color);
                     strokeColorPanel.repaint();
-                }
-                // REQUIREMENT: Select the fill color of the shape with the right click
-                else if (e.getButton() == MouseEvent.BUTTON3) {
-                    // Right click: fill color
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    // Clic derecho: color de relleno
                     drawingPanel.setCurrentFillColor(color);
                     fillColorPanel.setBackground(color);
                     fillColorPanel.repaint();
                 }
-                
-                colorPanel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLoweredBevelBorder(),
-                    BorderFactory.createRaisedBevelBorder()));
-            }
-            
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                colorPanel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createRaisedBevelBorder(),
-                    BorderFactory.createLoweredBevelBorder()));
             }
             
             @Override
@@ -545,25 +651,33 @@ public class PaintApp {
             
             @Override
             public void mouseExited(MouseEvent e) {
-                colorPanel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createRaisedBevelBorder(),
-                    BorderFactory.createLoweredBevelBorder()));
+                colorPanel.setBorder(BorderFactory.createRaisedBevelBorder());
             }
         });
         
         return colorPanel;
     }
 
-    // Adds Clear button that removes all content from canvas
     private void addClearButton(JPanel toolPanel, DrawingPanel drawingPanel, GridBagConstraints gbc) {
-        gbc.gridy = 15;
+        gbc.gridy++;
         toolPanel.add(Box.createVerticalStrut(20), gbc);
         
-        JButton clearBtn = new JButton("🗑️ Clear Canvas");
+        JButton clearBtn = new JButton();
+        clearBtn.setLayout(new BorderLayout());
+        
+        JPanel iconPanel = new JPanel();
+        iconPanel.setOpaque(false);
+        iconPanel.add(new JLabel(new CustomIcon("CLEAR", 20, Color.BLACK)));
+        
+        JLabel textLabel = new JLabel("Clear Canvas", SwingConstants.CENTER);
+        textLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        textLabel.setForeground(Color.BLACK);
+        
+        clearBtn.add(iconPanel, BorderLayout.WEST);
+        clearBtn.add(textLabel, BorderLayout.CENTER);
+        
         clearBtn.setPreferredSize(new Dimension(250, 50));
-        clearBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         clearBtn.setBackground(new Color(220, 53, 69));
-        clearBtn.setForeground(Color.WHITE);
         clearBtn.setFocusPainted(false);
         clearBtn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         clearBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -582,11 +696,10 @@ public class PaintApp {
         
         clearBtn.addActionListener(e -> drawingPanel.clearCanvas());
         
-        gbc.gridy = 16;
+        gbc.gridy++;
         toolPanel.add(clearBtn, gbc);
     }
 
-    // Creates bottom panel with slider control for brush size
     private JPanel createSizePanel(DrawingPanel drawingPanel) {
         JPanel sizePanel = new JPanel() {
             @Override
@@ -603,35 +716,47 @@ public class PaintApp {
         };
         sizePanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)));
         sizePanel.setPreferredSize(new Dimension(0, 100));
+        sizePanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 30, 25));
         
-        JLabel sizeLabel = new JLabel("Brush Size:");
-        sizeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        // Panel con icono para stroke size
+        JPanel strokePanel = new JPanel();
+        strokePanel.setOpaque(false);
+        
+        JPanel iconPanel = new JPanel();
+        iconPanel.setOpaque(false);
+        iconPanel.add(new JLabel(new CustomIcon("STROKE", 24, Color.DARK_GRAY)));
+        
+        JLabel sizeLabel = new JLabel(" Stroke Size:");
+        sizeLabel.setFont(new Font("Arial", Font.BOLD, 16));
         sizeLabel.setForeground(new Color(73, 80, 87));
         
-        JSlider sizeSlider = new JSlider(1, 30, 3);
-        sizeSlider.setMajorTickSpacing(10);
-        sizeSlider.setMinorTickSpacing(5);
+        JSlider sizeSlider = new JSlider(1, 20, 2);
+        sizeSlider.setMajorTickSpacing(5);
+        sizeSlider.setMinorTickSpacing(1);
         sizeSlider.setPaintTicks(true);
         sizeSlider.setPaintLabels(true);
         sizeSlider.setOpaque(false);
-        sizeSlider.setPreferredSize(new Dimension(400, 60));
+        sizeSlider.setPreferredSize(new Dimension(400, 50));
         
-        JLabel currentSizeLabel = new JLabel("3px");
-        currentSizeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        JLabel currentSizeLabel = new JLabel("2px");
+        currentSizeLabel.setFont(new Font("Arial", Font.BOLD, 16));
         currentSizeLabel.setForeground(new Color(67, 56, 202));
         currentSizeLabel.setPreferredSize(new Dimension(50, 25));
         
         sizeSlider.addChangeListener(e -> {
             int size = sizeSlider.getValue();
-            drawingPanel.setBrushSize(size);
+            drawingPanel.setStrokeSize(size);
             currentSizeLabel.setText(size + "px");
         });
         
-        sizePanel.add(sizeLabel);
-        sizePanel.add(Box.createHorizontalStrut(20));
-        sizePanel.add(sizeSlider);
-        sizePanel.add(Box.createHorizontalStrut(20));
-        sizePanel.add(currentSizeLabel);
+        strokePanel.add(iconPanel);
+        strokePanel.add(sizeLabel);
+        strokePanel.add(Box.createHorizontalStrut(10));
+        strokePanel.add(sizeSlider);
+        strokePanel.add(Box.createHorizontalStrut(10));
+        strokePanel.add(currentSizeLabel);
+        
+        sizePanel.add(strokePanel);
         
         return sizePanel;
     }
